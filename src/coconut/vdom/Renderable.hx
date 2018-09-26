@@ -24,7 +24,7 @@ class Renderable extends Widget {
         
   @:noCompletion override public function init():Element {
     if (__binding == null) {
-      else if (__dom == null) {
+      if (__dom != null) {
         this.beforeInit();
         var next = __rendered.value;
         var changes = diff(__lastRender, next);
