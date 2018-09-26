@@ -23,13 +23,22 @@ class Renderable extends Widget {
   }
         
   @:noCompletion override public function init():Element {
-    if (this.__dom != null) return this.__dom;
-    
-    __lastRender = __rendered.value;
-    this.beforeInit();
-    this.__dom = create(__lastRender);
-    this.afterInit(__dom);
-    __setupBinding();
+    if (__binding == null) {
+      else if (__dom == null) {
+        this.beforeInit();
+        var next = __rendered.value;
+        var changes = diff(__lastRender, next);
+        __lastRender = next;
+        this.__dom = patch(__dom, changes);    
+      }
+      else {
+        __lastRender = __rendered.value;
+        this.beforeInit();
+        this.__dom = create(__lastRender);
+      }
+      this.afterInit(__dom);
+      __setupBinding();
+    }
     
     return this.__dom;
   }
@@ -79,6 +88,7 @@ class Renderable extends Widget {
   @:noCompletion override public function destroy():Void {
     beforeDestroy(this.__dom);
     this.__binding.dissolve();
+    this.__binding = null;
     super.destroy();
     
     function _destroy(v:VNode) {
@@ -96,7 +106,6 @@ class Renderable extends Widget {
     }
     _destroy(__lastRender);
     afterDestroy(this.__dom);
-    this.__dom = null;
   }  
 }
 #else
